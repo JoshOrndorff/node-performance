@@ -26,8 +26,9 @@
   "dependencies": {
     "@grpc/proto-loader": "^0.3.0",
     "docopt": "^0.6.2",
-    "express": "^4.16.3",
+    "express": "^4.15.2",
     "grpc": "^1.14.1",
-    "rchain-api": "github:rchain-community/rchain-api#19eacd10aad6c9c1d4c7bf18c1b6c40092546e52"
+    "rchain-api": "github:rchain-community/rchain-api#19eacd10aad6c9c1d4c7bf18c1b6c40092546e52",
+    "socket.io": "^2.1.1"
   }
 }

@@ -2,6 +2,10 @@ const { RNode, RHOCore } = require('rchain-api');
 const docopt = require('docopt').docopt;
 const grpc = require('grpc');
 const fs = require('fs');
+const express = require('express');
+const app = express();
+const http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 const usage = `
 
@@ -26,21 +30,37 @@ Options:
  -h --help                 show usage
 
 `;
-
 const cli = docopt(usage, { argv: process.argv.slice(2) });
 console.log('DEBUG: cli:', cli);
 
+// Initialize globals ()@dckc will hate this)
 const myNode = RNode(grpc, { host: cli["--host"], port: cli["--port"] });
-
 const clock = () => (new Date()).valueOf();
 const deployCooldown = cli["--deploy-cooldown"];
 const proposeCooldown = cli["--propose-cooldown"];
 const term = fs.readFileSync(cli['--term'])
 
-deployPropose(cli["--iterations"]);
+// Start the actual deployments
+deployPropose(term, cli["--iterations"]);
 
+// Setup a path
+app.get('/', function(req, res){
+  res.sendFile(__dirname + '/index.html');
+});
 
+// Serve static assets like index.html and page.js from root directory
+app.use(express.static(__dirname));
 
+io.on('connection', function(socket){
+  console.log('a user connected.');
+  socket.on('chat message', function(msg){
+    console.log('message: ' + msg);
+  });
+});
+
+http.listen(3000, function(){
+  console.log('listening on *:3000');
+});
 
 
 
@@ -73,7 +93,11 @@ function deployPropose(term, count){
     })
     .then(_ => {
       proposeDone = clock();
-      console.log(`Deploy Time: ${deployDone - start}. Propose Time: ${proposeDone - proposeStart}`);
+
+      let data = `Deploy Time: ${deployDone - start}. Propose Time: ${proposeDone - proposeStart}`;
+      console.log(data);
+      io.emit('data', data);
+
       return new Promise(resolve => setTimeout(resolve, proposeCooldown * 1000));
     })
     .then(_ => {
