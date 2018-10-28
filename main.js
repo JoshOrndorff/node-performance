@@ -94,9 +94,10 @@ function deployPropose(term, count){
     .then(_ => {
       proposeDone = clock();
 
-      let data = `Deploy Time: ${deployDone - start}. Propose Time: ${proposeDone - proposeStart}`;
-      console.log(data);
-      io.emit('data', data);
+      let deployTime = deployDone - start;
+      let proposeTime = proposeDone - proposeStart;
+      console.log(`Deploy: ${deployTime} Propose: ${proposeTime}`);
+      io.emit('data', proposeTime);
 
       return new Promise(resolve => setTimeout(resolve, proposeCooldown * 1000));
     })
