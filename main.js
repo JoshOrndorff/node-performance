@@ -1,6 +1,7 @@
 const { RNode, RHOCore } = require('rchain-api');
 const docopt = require('docopt').docopt;
 const grpc = require('grpc');
+const fs = require('fs');
 
 const usage = `
 
@@ -14,6 +15,8 @@ Options:
                            [default: localhost]
  --port INT                The tcp port of the nodes gRPC service
                            [default: 40401]
+ --term STRING             The rholang file to deploy
+                           [default: basicSend.rho]
  -d --deploy-cooldown INT  Seconds to wait after deploy completion
                            [default: 0]
  -p --propose-cooldown INT Seconds to wait after propose completion
@@ -32,6 +35,7 @@ const myNode = RNode(grpc, { host: cli["--host"], port: cli["--port"] });
 const clock = () => (new Date()).valueOf();
 const deployCooldown = cli["--deploy-cooldown"];
 const proposeCooldown = cli["--propose-cooldown"];
+const term = fs.readFileSync(cli['--term'])
 
 deployPropose(cli["--iterations"]);
 
@@ -44,12 +48,12 @@ deployPropose(cli["--iterations"]);
  * Deploys a term and proposes a block with appropriate
  * cooldown periods in between.
  */
-function deployPropose(count){
+function deployPropose(term, count){
   const deployData = {
-    term: "@Nil!(Nil)",
+    term,
     timestamp: clock(),
     phloPrice: { value: 1 },
-    phloLimit: { value: 10000 },
+    phloLimit: { value: 10000000 },
     from: "0x01",
   }
 
@@ -74,7 +78,7 @@ function deployPropose(count){
     })
     .then(_ => {
       if (count > 0){
-        deployPropose(count - 1)
+        deployPropose(term, count - 1)
       }
     })
 

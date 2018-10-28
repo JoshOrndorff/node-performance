@@ -1,0 +1,58 @@
+// A card is a pair: ("Spades", 1) is the ace of Spades.
+new highCard, pick, stderr(`rho:io:stderr`) in {
+  new gameCh, p1Ch, p2Ch in {
+    highCard!(*gameCh) | for (myGame <- gameCh) {
+      @[*myGame, "draw"]!(*p1Ch)
+      |
+      @[*myGame, "draw"]!(*p2Ch)
+      |
+      for (@(suit1, rank1) <- p1Ch; @(suit2, rank2) <- p2Ch) {
+        // ISSUE: same rank?
+        if (rank1 > rank2) {
+          stderr!(["winner", (suit1, rank1)]) |
+          stderr!(["loser", (suit2, rank2)])
+        } else {
+          stderr!(["winner", (suit2, rank2)]) |
+          stderr!(["loser", (suit1, rank1)])
+        }
+      }
+    }
+  }
+  |
+  contract highCard(return) = {
+    new self, rankCh, suitCh in {
+      stderr!(["@@highCard game:", *self]) |
+      return!(*self)
+      |
+      contract @[*self, "draw"](return) = {
+        pick!([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], *rankCh) |
+        pick!(["Diamonds", "Clubs", "Hearts", "Spades"], *suitCh) |
+        for (@rank <- rankCh; @suit <- suitCh) {
+          return!((suit, rank))
+        }
+      }
+    }
+  }
+  |
+  contract pick(@items, return) = {
+    stderr!(["@@pick from among:", items]) |
+    // Send all the items to a (new) channel and then receive one.
+    // Kinda wasteful, especially if ch is not garbage-collected.
+    new loop, ch in {
+      contract loop(@xs) = {
+        match xs {
+          [] => {
+            for (@winner <- ch) {
+              return!(winner)
+            }
+          }
+          [first, ...rest] => {
+            ch!(first) | loop!(rest)
+          }
+        }
+      }
+      |
+      loop!(items)
+    }
+  }
+}
