@@ -1,0 +1,10 @@
+new chan in {
+  chan!(10) |
+
+  for(@n <= chan) {
+    if ( n != 0 ) {
+      chan!(n - 1) |
+      chan!(n - 1)
+    }
+  }
+}
