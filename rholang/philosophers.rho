@@ -1,3 +1,6 @@
+// Thanks to Mike Stay
+// https://developer.rchain.coop/tutorial/#dining-philosophers-and-deadlock
+
 new philosopher1, philosopher2, north, south, knife, spoon in {
   north!(*knife) |
   south!(*spoon) |

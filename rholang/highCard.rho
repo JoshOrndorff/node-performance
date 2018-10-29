@@ -1,3 +1,6 @@
+// Thanks to Dan Connolly
+// https://gist.github.com/dckc/82faeebb5b4d762a3bbecc0617b4e0c5
+
 // A card is a pair: ("Spades", 1) is the ace of Spades.
 new highCard, pick, stderr(`rho:io:stderr`) in {
   new gameCh, p1Ch, p2Ch in {
